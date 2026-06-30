@@ -119,7 +119,8 @@ class _JournalSectionState extends State<JournalSection> {
               const double collapsedWidth = 56.0;
               const double spacing = 12.0;
               final double totalWidth = constraints.maxWidth;
-              final double activeWidth = totalWidth - (collapsedWidth * 2) - (spacing * 2);
+              final double activeWidth =
+                  totalWidth - (collapsedWidth * 2) - (spacing * 2);
 
               return SizedBox(
                 height: 280,
@@ -139,7 +140,7 @@ class _JournalSectionState extends State<JournalSection> {
                               _selectedIndex = index;
                             });
                           } else {
-                            context.push(AppRouter.journalDetail);
+                            context.push(AppRouter.journal);
                           }
                         },
                         child: AnimatedContainer(
@@ -148,7 +149,9 @@ class _JournalSectionState extends State<JournalSection> {
                           width: isSelected ? activeWidth : collapsedWidth,
                           height: 280,
                           decoration: BoxDecoration(
-                            color: isSelected ? Colors.transparent : card.collapsedBgColor,
+                            color: isSelected
+                                ? Colors.transparent
+                                : card.collapsedBgColor,
                             borderRadius: BorderRadius.circular(32),
                             boxShadow: [
                               BoxShadow(
@@ -186,17 +189,18 @@ class _JournalSectionState extends State<JournalSection> {
     );
   }
 
-  Widget _buildExpandedCard(BuildContext context, _JournalCardData card, int index) {
+  Widget _buildExpandedCard(
+    BuildContext context,
+    _JournalCardData card,
+    int index,
+  ) {
     final textTheme = Theme.of(context).textTheme;
 
     return Stack(
       key: ValueKey('expanded_$index'),
       fit: StackFit.expand,
       children: [
-        Image.asset(
-          card.image,
-          fit: BoxFit.cover,
-        ),
+        Image.asset(card.image, fit: BoxFit.cover),
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -263,7 +267,11 @@ class _JournalSectionState extends State<JournalSection> {
     );
   }
 
-  Widget _buildCollapsedCard(BuildContext context, _JournalCardData card, int index) {
+  Widget _buildCollapsedCard(
+    BuildContext context,
+    _JournalCardData card,
+    int index,
+  ) {
     return Container(
       key: ValueKey('collapsed_$index'),
       width: double.infinity,
@@ -272,11 +280,7 @@ class _JournalSectionState extends State<JournalSection> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            card.icon,
-            color: card.collapsedTextColor,
-            size: 24,
-          ),
+          Icon(card.icon, color: card.collapsedTextColor, size: 24),
           const SizedBox(height: 16),
           RotatedBox(
             quarterTurns: 3,

@@ -192,9 +192,6 @@ class _BlurredCircle extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      child: const DecoratedBox(
-        decoration: BoxDecoration(shape: BoxShape.circle),
-      ),
     );
   }
 }

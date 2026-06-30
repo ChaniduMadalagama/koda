@@ -9,8 +9,8 @@ class SetupJournalView extends StatefulWidget {
   State<SetupJournalView> createState() => _SetupJournalViewState();
 }
 
-class _SetupJournalViewState extends State<SetupJournalView>
-    with TickerProviderStateMixin {
+// Use Single because we only have one AnimationController here
+class _SetupJournalViewState extends State<SetupJournalView> with SingleTickerProviderStateMixin {
   final TextEditingController _nameController = TextEditingController();
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -22,11 +22,11 @@ class _SetupJournalViewState extends State<SetupJournalView>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeIn,
-    );
-    _fadeController.forward();
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeIn);
+    // Schedule after first frame to avoid jank on navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _fadeController.forward();
+    });
   }
 
   @override
@@ -74,9 +74,7 @@ class _SetupJournalViewState extends State<SetupJournalView>
                     const SizedBox(height: 40),
                     _buildSuggestionsHeader(textTheme),
                     const SizedBox(height: 16),
-                    Expanded(
-                      child: _buildSuggestionsGrid(colorScheme, textTheme),
-                    ),
+                    Expanded(child: _buildSuggestionsGrid(colorScheme, textTheme)),
                     _buildFooterAction(colorScheme, textTheme),
                   ],
                 ),
@@ -92,12 +90,14 @@ class _SetupJournalViewState extends State<SetupJournalView>
     return Column(
       children: [
         Center(
-          child: Container(
+          child: SizedBox(
             width: 64,
             height: 64,
-            padding: const EdgeInsets.all(12),
             child: Image.network(
               'https://lh3.googleusercontent.com/aida/ADBb0ugi_14SoYvyvGMzEYXyKnd91AcfDYeHO3fLJb99DUxSd8vfhc7ouLXjsYZ7x3iYsJDXOTZthfuPFt9x3xAJnNEteHRdsAVBrMlcTOXKn3lD4_nJu2CoTlaiMIrIaEGa19xkLG20O3I5xka4RM9tiVhPXsUFAekEq26BbH7mKVxwhsqONxm_Cq7HGqX5I1kYAww50ED4ODuFTEY0pD4_fjGlvJYe6OcG_2o3VX0RzOeaIcptv_bFsk3kuRyI',
+              fit: BoxFit.contain,
+              // Graceful fallback to avoid white flash on slow networks
+              errorBuilder: (_, __, ___) => const Icon(Icons.eco),
             ),
           ),
         ),
@@ -105,30 +105,11 @@ class _SetupJournalViewState extends State<SetupJournalView>
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 48,
-              height: 6,
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
+            Container(width: 48, height: 6, decoration: BoxDecoration(color: colorScheme.primaryContainer, borderRadius: BorderRadius.circular(3))),
             const SizedBox(width: 8),
-            Container(
-              width: 48,
-              height: 6,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
+            Container(width: 48, height: 6, decoration: BoxDecoration(color: colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(3))),
             const SizedBox(width: 12),
-            Text(
-              'Step 1 of 2',
-              style: textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
+            Text('Step 1 of 2', style: textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
           ],
         ),
       ],
@@ -138,19 +119,13 @@ class _SetupJournalViewState extends State<SetupJournalView>
   Widget _buildHeader(TextTheme textTheme) {
     return Column(
       children: [
-        Text(
-          'Give your journal a name',
-          style: textTheme.headlineLarge,
-          textAlign: TextAlign.center,
-        ),
+        Text('Give your journal a name', style: textTheme.headlineLarge, textAlign: TextAlign.center),
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Text(
             'This is the soul of your daily practice. Choose something that feels like home.',
-            style: textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            style: textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
         ),
@@ -163,31 +138,17 @@ class _SetupJournalViewState extends State<SetupJournalView>
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: TextField(
         controller: _nameController,
         style: textTheme.bodyLarge,
         decoration: InputDecoration(
           hintText: 'Type a name...',
-          hintStyle: textTheme.bodyLarge?.copyWith(
-            color: colorScheme.onSurfaceVariant.withOpacity(0.4),
-          ),
-          suffixIcon: Icon(
-            Icons.edit,
-            color: colorScheme.primary.withOpacity(0.4),
-          ),
+          hintStyle: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant.withOpacity(0.4)),
+          suffixIcon: Icon(Icons.edit, color: colorScheme.primary.withOpacity(0.4)),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 20,
-          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         ),
       ),
     );
@@ -209,25 +170,21 @@ class _SetupJournalViewState extends State<SetupJournalView>
         children: [
           Row(
             children: [
-              Expanded(
-                child: _SuggestionCard(
-                  title: 'My Mindful Partner',
-                  icon: Icons.favorite,
-                  color: colorScheme.primaryContainer.withOpacity(0.2),
-                  iconColor: colorScheme.onPrimaryContainer,
-                  onTap: () => _nameController.text = 'My Mindful Partner',
-                ),
-              ),
+              Expanded(child: _SuggestionCard(
+                title: 'My Mindful Partner',
+                icon: Icons.favorite,
+                color: colorScheme.primaryContainer.withOpacity(0.2),
+                iconColor: colorScheme.onPrimaryContainer,
+                onTap: () => _nameController.text = 'My Mindful Partner',
+              )),
               const SizedBox(width: 16),
-              Expanded(
-                child: _SuggestionCard(
-                  title: 'Dear Friend',
-                  icon: Icons.auto_awesome,
-                  color: colorScheme.tertiaryContainer.withOpacity(0.2),
-                  iconColor: colorScheme.onTertiaryContainer,
-                  onTap: () => _nameController.text = 'Dear Friend',
-                ),
-              ),
+              Expanded(child: _SuggestionCard(
+                title: 'Dear Friend',
+                icon: Icons.auto_awesome,
+                color: colorScheme.tertiaryContainer.withOpacity(0.2),
+                iconColor: colorScheme.onTertiaryContainer,
+                onTap: () => _nameController.text = 'Dear Friend',
+              )),
             ],
           ),
           const SizedBox(height: 16),
@@ -243,25 +200,21 @@ class _SetupJournalViewState extends State<SetupJournalView>
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(
-                child: _SuggestionCard(
-                  title: 'Ink & Soul',
-                  icon: Icons.edit_note,
-                  color: colorScheme.surfaceContainerHigh,
-                  iconColor: colorScheme.onSurfaceVariant,
-                  onTap: () => _nameController.text = 'Ink & Soul',
-                ),
-              ),
+              Expanded(child: _SuggestionCard(
+                title: 'Ink & Soul',
+                icon: Icons.edit_note,
+                color: colorScheme.surfaceContainerHigh,
+                iconColor: colorScheme.onSurfaceVariant,
+                onTap: () => _nameController.text = 'Ink & Soul',
+              )),
               const SizedBox(width: 16),
-              Expanded(
-                child: _SuggestionCard(
-                  title: 'Grounded Life',
-                  icon: Icons.spa,
-                  color: const Color(0xFFE8F5E9),
-                  iconColor: const Color(0xFF2E7D32),
-                  onTap: () => _nameController.text = 'Grounded Life',
-                ),
-              ),
+              Expanded(child: _SuggestionCard(
+                title: 'Grounded Life',
+                icon: Icons.spa,
+                color: const Color(0xFFE8F5E9),
+                iconColor: const Color(0xFF2E7D32),
+                onTap: () => _nameController.text = 'Grounded Life',
+              )),
             ],
           ),
           const SizedBox(height: 24),
@@ -294,6 +247,9 @@ class _SetupJournalViewState extends State<SetupJournalView>
   }
 }
 
+// -------------------------------------------------------
+// Suggestion Card with isolated AnimationController
+// -------------------------------------------------------
 class _SuggestionCard extends StatefulWidget {
   final String title;
   final String? subtitle;
@@ -329,7 +285,9 @@ class _SuggestionCardState extends State<_SuggestionCard>
       vsync: this,
       duration: const Duration(milliseconds: 100),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(_controller);
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -342,10 +300,7 @@ class _SuggestionCardState extends State<_SuggestionCard>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap();
-      },
+      onTapUp: (_) { _controller.reverse(); widget.onTap(); },
       onTapCancel: () => _controller.reverse(),
       child: ScaleTransition(
         scale: _scaleAnimation,
@@ -365,15 +320,7 @@ class _SuggestionCardState extends State<_SuggestionCard>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: widget.iconColor.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(widget.icon, color: widget.iconColor),
-        ),
+        _IconBox(icon: widget.icon, color: widget.iconColor),
         const SizedBox(height: 16),
         Text(
           widget.title,
@@ -389,37 +336,48 @@ class _SuggestionCardState extends State<_SuggestionCard>
   Widget _buildWideContent() {
     return Row(
       children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: widget.iconColor.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Icon(widget.icon, color: widget.iconColor, size: 28),
-        ),
+        _IconBox(icon: widget.icon, color: widget.iconColor, size: 56, iconSize: 28, radius: 16),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(color: widget.iconColor),
-              ),
+              Text(widget.title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: widget.iconColor)),
               if (widget.subtitle != null)
-                Text(
-                  widget.subtitle!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: widget.iconColor.withOpacity(0.7),
-                  ),
-                ),
+                Text(widget.subtitle!, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: widget.iconColor.withOpacity(0.7))),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _IconBox extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final double size;
+  final double iconSize;
+  final double radius;
+
+  const _IconBox({
+    required this.icon,
+    required this.color,
+    this.size = 40,
+    this.iconSize = 20,
+    this.radius = 12,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(radius),
+      ),
+      child: Icon(icon, color: color, size: iconSize),
     );
   }
 }

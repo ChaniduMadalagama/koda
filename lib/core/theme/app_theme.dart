@@ -27,6 +27,7 @@ class ThemeServiceProvider with ChangeNotifier {
   static const Color _onPrimary = Color(0xFFFFFFFF);
   static const Color _primaryContainer = Color(0xFFFFB82B);
   static const Color _onPrimaryContainer = Color(0xFF6D4B00);
+  static const Color _primaryFixed = Color(0xFFFFDEAC);
 
   static const Color _secondary = Color(0xFF71585B);
   static const Color _onSecondary = Color(0xFFFFFFFF);
@@ -41,8 +42,10 @@ class ThemeServiceProvider with ChangeNotifier {
   static const Color _background = Color(0xFFFEF8FC);
   static const Color _surface = Color(0xFFFEF8FC);
   static const Color _onSurface = Color(0xFF1D1B1E);
-  static const Color _surfaceVariant = Color(0xFFE7E1E5);
   static const Color _onSurfaceVariant = Color(0xFF514534);
+  static const Color _surfaceContainerHighest = Color(0xFFE7E1E5);
+  static const Color _surfaceContainerLow = Color(0xFFF8F2F6);
+  static const Color _surfaceContainerHigh = Color(0xFFECE6EA);
 
   static const Color _outline = Color(0xFF837561);
   static const Color _error = Color(0xFFBA1A1A);
@@ -71,21 +74,22 @@ class ThemeServiceProvider with ChangeNotifier {
         onSurface: _onSurface,
         onSurfaceVariant: _onSurfaceVariant,
         outline: _outline,
+        surfaceContainerHighest: _surfaceContainerHighest,
+        surfaceContainerLow: _surfaceContainerLow,
+        surfaceContainerHigh: _surfaceContainerHigh,
       ),
       textTheme: _textTheme(),
       elevatedButtonTheme: _elevatedButtonTheme(),
-      appBarTheme: _appBarTheme(isDark: false),
+      appBarTheme: _appBarTheme(),
       cardTheme: CardThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 0,
-        color: _surfaceVariant,
+        color: _surfaceContainerHighest,
       ),
     );
   }
 
   ThemeData _darkThemeData() {
-    // Mirroring light theme for now as specific dark mappings weren't provided,
-    // but using Inverse Surface as a base.
     return _lightThemeData().copyWith(brightness: Brightness.dark);
   }
 
@@ -139,6 +143,7 @@ class ThemeServiceProvider with ChangeNotifier {
         elevation: 0,
         shape: const StadiumBorder(),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        minimumSize: const Size(340, 64),
         textStyle: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.bold,
@@ -147,7 +152,7 @@ class ThemeServiceProvider with ChangeNotifier {
     );
   }
 
-  AppBarTheme _appBarTheme({required bool isDark}) {
+  AppBarTheme _appBarTheme() {
     return AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -173,4 +178,7 @@ class ThemeServiceProvider with ChangeNotifier {
       ),
     );
   }
+
+  // Exposed for use in widgets that need the primary fixed shade (e.g. splash bg)
+  static const Color primaryFixed = _primaryFixed;
 }

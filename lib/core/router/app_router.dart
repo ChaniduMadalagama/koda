@@ -5,8 +5,7 @@ import '../../views/splash/splash_view.dart';
 import '../../views/auth/auth_view.dart';
 import '../../views/onboarding/setup_journal_view.dart';
 import '../../views/home/home_view.dart';
-import '../../views/home/journal_detail_view.dart';
-import '../../views/home/add_journal_view.dart';
+import '../../views/journal/new_entry_view.dart';
 import '../../views/shared/main_shell.dart';
 
 class AppRouter {
@@ -17,8 +16,8 @@ class AppRouter {
   static const String explore = '/explore';
   static const String journey = '/journey';
   static const String profile = '/profile';
-  static const String journalDetail = '/journal-detail';
-  static const String addJournal = '/add-journal';
+  static const String newEntry = '/new-entry';
+  static const String journal = '/journal';
 
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
   static final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -27,22 +26,26 @@ class AppRouter {
     initialLocation: splash,
     navigatorKey: _rootNavigatorKey,
     routes: [
-      GoRoute(path: splash, builder: (context, state) => const SplashView()),
-      GoRoute(path: auth, builder: (context, state) => const AuthView()),
+      GoRoute(
+        path: splash,
+        builder: (context, state) => const SplashView(),
+      ),
+      GoRoute(
+        path: auth,
+        builder: (context, state) => const AuthView(),
+      ),
       GoRoute(
         path: setupJournal,
         builder: (context, state) => const SetupJournalView(),
       ),
+      // New entry is OUTSIDE the shell so it gets a full-screen modal experience
       GoRoute(
-        path: addJournal,
-        builder: (context, state) => const AddJournalView(),
+        path: newEntry,
+        builder: (context, state) => const NewEntryView(),
       ),
       GoRoute(
-        path: journalDetail,
-        builder: (context, state) {
-          final date = state.extra as DateTime?;
-          return JournalDetailView(selectedDate: date);
-        },
+        path: journal,
+        builder: (context, state) => const NewEntryView(),
       ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
@@ -54,18 +57,15 @@ class AppRouter {
           ),
           GoRoute(
             path: explore,
-            builder: (context, state) =>
-                const Placeholder(child: Center(child: Text("Explore"))),
+            builder: (context, state) => const Scaffold(body: Center(child: Text('Explore'))),
           ),
           GoRoute(
             path: journey,
-            builder: (context, state) =>
-                const Placeholder(child: Center(child: Text("Journey"))),
+            builder: (context, state) => const Scaffold(body: Center(child: Text('Journey'))),
           ),
           GoRoute(
             path: profile,
-            builder: (context, state) =>
-                const Placeholder(child: Center(child: Text("Profile"))),
+            builder: (context, state) => const Scaffold(body: Center(child: Text('Profile'))),
           ),
         ],
       ),

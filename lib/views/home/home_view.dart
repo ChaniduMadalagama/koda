@@ -14,7 +14,7 @@ class HomeView extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFFF2F1ED),
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
